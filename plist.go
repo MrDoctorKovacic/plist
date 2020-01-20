@@ -28,11 +28,11 @@ func execute(cmd *exec.Cmd) (string, error) {
 }
 
 // GetLineNumber returns the line number a key's value is located in the given plist
-func GetLineNumber(plist []byte, value string) (int, error) {
+func GetLineNumber(plist *[]byte, value string) (int, error) {
 	// Convert
 	cmd := fmt.Sprintf("plutil -p - | grep \"%s\" | awk '/{value/ {print $NF}'", value)
 	convert1 := exec.Command("bash", "-c", cmd)
-	convert1.Stdin = bytes.NewReader(plist)
+	convert1.Stdin = bytes.NewReader(*plist)
 	out, err := execute(convert1)
 	if err != nil {
 		return -1, err
@@ -47,10 +47,10 @@ func GetLineNumber(plist []byte, value string) (int, error) {
 }
 
 // ExtractValueAtLine returns the value at a given line number in the plist
-func ExtractValueAtLine(plist []byte, line int) (string, error) {
+func ExtractValueAtLine(plist *[]byte, line int) (string, error) {
 	cmd := fmt.Sprintf("plutil -extract '$objects.%d' xml1 -o - - | awk -F \"[<>]\" '/<string>/ {print $3}'", line)
 	convert1 := exec.Command("bash", "-c", cmd)
-	convert1.Stdin = bytes.NewReader(plist)
+	convert1.Stdin = bytes.NewReader(*plist)
 	out, err := execute(convert1)
 	if err != nil {
 		return "", err
@@ -60,10 +60,10 @@ func ExtractValueAtLine(plist []byte, line int) (string, error) {
 }
 
 // IsLike will determine if a plist blob indicates this comment is a like
-func IsLike(plist []byte) (bool, error) {
+func IsLike(plist *[]byte) (bool, error) {
 	cmd := fmt.Sprintf("plutil -p - | awk '/isLike/ {print $NF}'")
 	convert1 := exec.Command("bash", "-c", cmd)
-	convert1.Stdin = bytes.NewReader(plist)
+	convert1.Stdin = bytes.NewReader(*plist)
 	out, err := execute(convert1)
 	if err != nil {
 		return false, err
@@ -77,7 +77,7 @@ func IsLike(plist []byte) (bool, error) {
 }
 
 // GetValue will parse the given plist blob and search for the requested value
-func GetValue(plist []byte, value string) (string, error) {
+func GetValue(plist *[]byte, value string) (string, error) {
 	line, err := GetLineNumber(plist, value)
 	if err != nil {
 		return "", err
