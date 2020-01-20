@@ -89,30 +89,3 @@ func GetValue(plist *[]byte, value string) (string, error) {
 	}
 	return strings.TrimSpace(out), nil
 }
-
-/*
-func plistToJSON(plist []byte) (string, error) {
-	if plist == nil {
-		return "", fmt.Errorf("Empty PList")
-	}
-
-	d1 := plist
-	err := ioutil.WriteFile("/tmp/dat1.plist", d1, 0644)
-	if err != nil {
-		return "", err
-	}
-	//defer os.Remove("/tmp/dat1.plist")
-
-	// Convert
-	cmd := "plutil -convert xml1 -o - /tmp/dat1.plist | sed -e 's/date/string/g' | plutil -convert json -o - -"
-	convert1 := exec.Command("bash", "-c", cmd)
-	out, err := executeCMD(convert1)
-	if err != nil {
-		return "", err
-	}
-
-	//defer os.Remove("/tmp/out.plist")
-
-	return out, nil
-
-}*/
