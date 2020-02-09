@@ -97,14 +97,16 @@ func IsLikeNative(plist *[]byte) (bool, error) {
 		return false, err
 	}
 
-	isLikeString := isLikeRegex.FindString(out)
-	fmt.Println(out)
+	isLikeMatches := isLikeRegex.FindStringSubmatch(out)
 
-	boolOut, err := strconv.ParseBool(strings.TrimSpace(isLikeString))
-	if err != nil {
-		return false, err
+	isLike := false
+	if len(isLikeMatches) > 0 {
+		isLike, err = strconv.ParseBool(isLikeMatches[1])
+		if err != nil {
+			return false, err
+		}
 	}
-	return boolOut, nil
+	return isLike, nil
 }
 
 // GetValue will parse the given plist blob and search for the requested value
