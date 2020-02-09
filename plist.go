@@ -91,8 +91,7 @@ func IsLikeNative(plist *[]byte) (bool, error) {
 	if plist == nil {
 		return false, fmt.Errorf("Empty plist")
 	}
-	cmd := fmt.Sprintf("/usr/bin/plutil -p -")
-	command := exec.Command(cmd)
+	command := exec.Command("/usr/bin/plutil", "-p", "-")
 	out, err := execute(command, bytes.NewReader(*plist))
 	if err != nil {
 		return false, err
