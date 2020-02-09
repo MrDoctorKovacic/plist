@@ -51,7 +51,7 @@ func GetLineNumber(plist *[]byte, value string) (int, error) {
 	for _, line := range lineNumberLines {
 		fmt.Println(line)
 		if strings.Contains(line, value) {
-			lineNumberMatches := lineNumberRegex.FindStringSubmatch(out)
+			lineNumberMatches := lineNumberRegex.FindStringSubmatch(line)
 
 			if len(lineNumberMatches) > 0 {
 				lineNumber, err = strconv.Atoi(lineNumberMatches[1])
