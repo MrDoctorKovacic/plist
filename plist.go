@@ -9,11 +9,10 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/rs/zerolog/log"
 )
 
 var isLikeRegex = regexp.MustCompile(`(?m)\"isLike\" => (\d)`)
+var lineNumberRegex = regexp.MustCompile(`(?m){value = (\d)}`)
 
 func execute(cmd *exec.Cmd, stdin io.Reader) (string, error) {
 	var out bytes.Buffer
@@ -37,19 +36,30 @@ func GetLineNumber(plist *[]byte, value string) (int, error) {
 	if plist == nil {
 		return -1, fmt.Errorf("Empty plist")
 	}
-	cmd := fmt.Sprintf("plutil -p - | grep \"%s\" | awk '/{value/ {print $NF}'", value)
-	command := exec.Command("bash", "-c", cmd)
+
+	command := exec.Command("/usr/bin/plutil", "-p", "-")
 	out, err := execute(command, bytes.NewReader(*plist))
 	if err != nil {
 		return -1, err
 	}
 
-	intOut, err := strconv.Atoi(strings.Replace(strings.TrimSpace(out), "}", "", -1))
-	if err != nil {
-		log.Error().Msg(fmt.Sprintf("Failed with string: %s", out))
-		return -1, err
+	lineNumber := -1
+	lineNumberLines := strings.Split(out, "\n")
+	for _, line := range lineNumberLines {
+		if strings.Contains(line, value) {
+			lineNumberMatches := lineNumberRegex.FindStringSubmatch(out)
+
+			if len(lineNumberMatches) > 0 {
+				lineNumber, err = strconv.Atoi(lineNumberMatches[1])
+				if err != nil {
+					return -1, err
+				}
+				break
+			}
+		}
 	}
-	return intOut, nil
+
+	return lineNumber, nil
 }
 
 // ExtractValueAtLine returns the value at a given line number in the plist
@@ -69,25 +79,6 @@ func ExtractValueAtLine(plist *[]byte, line int) (string, error) {
 
 // IsLike will determine if a plist blob indicates this comment is a like
 func IsLike(plist *[]byte) (bool, error) {
-	if plist == nil {
-		return false, fmt.Errorf("Empty plist")
-	}
-	cmd := fmt.Sprintf("plutil -p - | awk '/isLike/ {print $NF}'")
-	command := exec.Command("bash", "-c", cmd)
-	out, err := execute(command, bytes.NewReader(*plist))
-	if err != nil {
-		return false, err
-	}
-
-	boolOut, err := strconv.ParseBool(strings.TrimSpace(out))
-	if err != nil {
-		return false, err
-	}
-	return boolOut, nil
-}
-
-// IsLikeNative will determine if a plist blob indicates this comment is a like
-func IsLikeNative(plist *[]byte) (bool, error) {
 	if plist == nil {
 		return false, fmt.Errorf("Empty plist")
 	}
