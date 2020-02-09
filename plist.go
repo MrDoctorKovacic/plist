@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/rs/zerolog/log"
 )
+
+var isLikeRegex = regexp.MustCompile(`(?m)\"isLike\" => (\d)`)
 
 func execute(cmd *exec.Cmd) (string, error) {
 	var out bytes.Buffer
@@ -78,6 +81,29 @@ func IsLike(plist *[]byte) (bool, error) {
 	}
 
 	boolOut, err := strconv.ParseBool(strings.TrimSpace(out))
+	if err != nil {
+		return false, err
+	}
+	return boolOut, nil
+}
+
+// IsLikeNative will determine if a plist blob indicates this comment is a like
+func IsLikeNative(plist *[]byte) (bool, error) {
+	if plist == nil {
+		return false, fmt.Errorf("Empty plist")
+	}
+	cmd := fmt.Sprintf("plutil -p -")
+	plistOutput := exec.Command(cmd)
+	plistOutput.Stdin = bytes.NewReader(*plist)
+	out, err := execute(plistOutput)
+
+	isLikeString := isLikeRegex.FindString(out)
+	fmt.Println(out)
+	if err != nil {
+		return false, err
+	}
+
+	boolOut, err := strconv.ParseBool(strings.TrimSpace(isLikeString))
 	if err != nil {
 		return false, err
 	}
