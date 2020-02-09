@@ -143,10 +143,17 @@ func main() {
 		log.Fatal(err)
 	}
 
-	out, err := GetValue(&b, value)
+	out, err := GetLineNumber(&b, value)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	fmt.Println(out)
+
+	out2, err := ExtractValueAtLine(&b, out)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(out2)
 }
