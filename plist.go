@@ -14,8 +14,8 @@ import (
 	"strings"
 )
 
-var isLikeRegex = regexp.MustCompile(`(?m)\"isLike\" => (\d)`)
-var lineNumberRegex = regexp.MustCompile(`(?m){value = (\d)}`)
+var isLikeRegex = regexp.MustCompile(`(?m)\"isLike\" => (\d+)`)
+var lineNumberRegex = regexp.MustCompile(`(?m){value = (\d+)}`)
 
 func execute(cmd *exec.Cmd, stdin io.Reader) (string, error) {
 	var out bytes.Buffer
