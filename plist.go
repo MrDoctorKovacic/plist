@@ -112,6 +112,9 @@ func GetValue(plist *[]byte, value string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if line == -1 {
+		return "", fmt.Errorf("%s not found in document", value)
+	}
 
 	out, err := ExtractValueAtLine(plist, line)
 	if err != nil {
