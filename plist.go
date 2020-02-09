@@ -3,6 +3,7 @@ package plist
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"regexp"
@@ -14,9 +15,10 @@ import (
 
 var isLikeRegex = regexp.MustCompile(`(?m)\"isLike\" => (\d)`)
 
-func execute(cmd *exec.Cmd) (string, error) {
+func execute(cmd *exec.Cmd, stdin io.Reader) (string, error) {
 	var out bytes.Buffer
 	var err2 bytes.Buffer
+	cmd.Stdin = stdin
 	cmd.Stdout = &out
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
@@ -36,9 +38,8 @@ func GetLineNumber(plist *[]byte, value string) (int, error) {
 		return -1, fmt.Errorf("Empty plist")
 	}
 	cmd := fmt.Sprintf("plutil -p - | grep \"%s\" | awk '/{value/ {print $NF}'", value)
-	convert1 := exec.Command("bash", "-c", cmd)
-	convert1.Stdin = bytes.NewReader(*plist)
-	out, err := execute(convert1)
+	command := exec.Command("bash", "-c", cmd)
+	out, err := execute(command, bytes.NewReader(*plist))
 	if err != nil {
 		return -1, err
 	}
@@ -57,9 +58,8 @@ func ExtractValueAtLine(plist *[]byte, line int) (string, error) {
 		return "", fmt.Errorf("Empty plist")
 	}
 	cmd := fmt.Sprintf("plutil -extract '$objects.%d' xml1 -o - - | awk -F \"[<>]\" '/<string>/ {print $3}'", line)
-	convert1 := exec.Command("bash", "-c", cmd)
-	convert1.Stdin = bytes.NewReader(*plist)
-	out, err := execute(convert1)
+	command := exec.Command("bash", "-c", cmd)
+	out, err := execute(command, bytes.NewReader(*plist))
 	if err != nil {
 		return "", err
 	}
@@ -73,9 +73,8 @@ func IsLike(plist *[]byte) (bool, error) {
 		return false, fmt.Errorf("Empty plist")
 	}
 	cmd := fmt.Sprintf("plutil -p - | awk '/isLike/ {print $NF}'")
-	convert1 := exec.Command("bash", "-c", cmd)
-	convert1.Stdin = bytes.NewReader(*plist)
-	out, err := execute(convert1)
+	command := exec.Command("bash", "-c", cmd)
+	out, err := execute(command, bytes.NewReader(*plist))
 	if err != nil {
 		return false, err
 	}
@@ -93,15 +92,14 @@ func IsLikeNative(plist *[]byte) (bool, error) {
 		return false, fmt.Errorf("Empty plist")
 	}
 	cmd := fmt.Sprintf("/usr/bin/plutil -p -")
-	plistOutput := exec.Command(cmd)
-	plistOutput.Stdin = bytes.NewReader(*plist)
-	out, err := execute(plistOutput)
-
-	isLikeString := isLikeRegex.FindString(out)
-	fmt.Println(out)
+	command := exec.Command(cmd)
+	out, err := execute(command, bytes.NewReader(*plist))
 	if err != nil {
 		return false, err
 	}
+
+	isLikeString := isLikeRegex.FindString(out)
+	fmt.Println(out)
 
 	boolOut, err := strconv.ParseBool(strings.TrimSpace(isLikeString))
 	if err != nil {
