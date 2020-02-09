@@ -140,5 +140,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	GetValue(&b, value)
+	out, err := GetValue(&b, value)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(out)
 }
