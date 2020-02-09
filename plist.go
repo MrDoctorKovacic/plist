@@ -1,9 +1,12 @@
-package plist
+package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"regexp"
@@ -115,4 +118,27 @@ func GetValue(plist *[]byte, value string) (string, error) {
 		return "", err
 	}
 	return strings.TrimSpace(out), nil
+}
+
+func main() {
+	var (
+		plistPath string
+		value     string
+	)
+
+	flag.StringVar(&plistPath, "plist", "", "Path to the plist file")
+	flag.StringVar(&value, "value", "", "Value to search the plist for")
+	flag.Parse()
+
+	f, err := os.Open(plistPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	GetValue(&b, value)
 }
