@@ -1,12 +1,9 @@
-package main
+package plist
 
 import (
 	"bytes"
-	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"regexp"
@@ -123,6 +120,7 @@ func GetValue(plist *[]byte, value string) (string, error) {
 	return strings.TrimSpace(out), nil
 }
 
+/*
 func main() {
 	var (
 		plistPath string
@@ -157,3 +155,4 @@ func main() {
 
 	fmt.Println(out2)
 }
+*/
