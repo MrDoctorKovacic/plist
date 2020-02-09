@@ -50,7 +50,6 @@ func GetLineNumber(plist *[]byte, value string) (int, error) {
 	lineNumberLines := strings.Split(out, "\n")
 	for _, line := range lineNumberLines {
 		if strings.Contains(line, value) {
-			fmt.Println(line)
 			lineNumberMatches := lineNumberRegex.FindStringSubmatch(line)
 
 			if len(lineNumberMatches) > 0 {
